@@ -1,0 +1,1451 @@
+<!DOCTYPE HTML>
+<html>
+
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta http-equiv="Content-Type"    content="text/html;charset=UTF-8"/>
+
+	<title>SAPUI5 - Demo PEREGOF</title>	
+	<link rel="stylesheet" type="text/css" href="https://sapui5.hana.ondemand.com/sdk/test-resources/sap/m/demokit/explored/index.css">
+	<link type="image/x-icon" href="https://sapui5.hana.ondemand.com/sdk/resources/sap/ui/core/mimes/logo/txtonly_16x16.ico" rel="shortcut icon" />
+	<link type="image/x-icon" href="https://sapui5.hana.ondemand.com/sdk/resources/sap/ui/core/mimes/logo/txtonly_16x16.ico" rel="icon" />
+    <script src="https://sapui5.netweaver.ondemand.com/resources/sap-ui-core.js" id="sap-ui-bootstrap"
+			data-sap-ui-libs="sap.m, sap.me, sap.makit, sap.ui.core, sap.ui.commons, sap.viz" data-sap-ui-theme="sap_bluecrystal">
+    </script>
+	
+	<script src="phonegap.js"></script>
+	
+	<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false">
+	</script>
+    
+	<script>
+	//?sap-ui-xx-fakeOS=ios
+	//?sap-ui-xx-fakeOS=iphone
+	//?sap-ui-xx-fakeOS=android
+	</script>
+	
+	<style>
+		#epta{
+			border       : 2px solid #565656;}
+		.Tile{ 
+			border       : 3px solid #0192C7;
+			box-shadow   : 5px 5px 5px #888888;
+			border-radius: 6px; }
+		.technicianimg{
+			width            :60px;
+			height           :60px;
+			animation        :animated_div 3s;
+			-moz-animation   :animated_div 3s;
+			-webkit-animation:animated_div 3s;
+			-o-animation     :animated_div 3s;
+			float            : left;}
+		.technicianimg2{
+			float            : left;}
+		@-webkit-keyframes animated_div{ 
+			0%	 {-webkit-transform: rotateY(0deg);}
+			100% {-webkit-transform: rotateY(360deg);}}
+		.techniciancontent{
+		    overflow     : auto;}
+		.techniciantext{
+		    margin-left  : 70px;}
+		.thumb{
+			margin-top   : 0px;
+			margin-left  : 5px;
+			margin-bottom: 0px;
+			float        : left; }
+		.text{
+			color        : #565656;
+			margin-top   : 2px;
+			margin-left  : 55px;
+			margin-bottom: 4px;
+			font-family  : Arial;
+			font-size    : 14px;
+			font-weight  : bold; }
+		.text2{
+			color        : #565656;
+			margin-left  : 55px;
+			font-family  : Arial;
+			font-size    : 10px;
+			font-weight  : bold; }
+		.left{
+			background-color: #DDDDDD;
+			margin-left     : 10px;
+			margin-right    : 10px;
+			margin-top      : 10px;
+			border          : 3px solid #0192C7; 
+			box-shadow      : 4px 4px 4px #888888;
+			overflow        : auto }
+		.calendar{
+			text-align      : center; }
+		.form{
+			margin-top      : 10px; }
+		.chart4{
+			box-shadow      : 4px 4px 4px #888888;
+			position        : relative;
+			margin-left     : 12px;
+			margin-right    : 12px;
+			margin-top      : 12px;
+			margin-bottom   : 12px;
+			border          : 3px solid #0192C7; }
+		.ichart{
+			background-color: white;
+			box-shadow      : 4px 4px 4px #888888;
+			position        : relative;
+			margin-left     : 32px;
+			margin-right    : auto;
+			margin-top      : 0px;
+			border          : 3px solid #0192C7; }
+	</style>
+	
+	<script>
+		var directionsDisplay;
+		var directionsService = new google.maps.DirectionsService();
+		var Map1;
+		var Map2;
+		var Map3;
+		var Panorama;
+		var customerCircle;
+		var geocoder;
+		var infowindow = [];
+		var iterator = 0;
+		var markers = [];
+		var engineers = [
+			"Milano, Via Rondoni 11",
+			"Milano, Via Mecenate 86",
+			"Milano, Corso Buenos Aires 1",
+			"Milano, Via Allori 16" ];
+		var customerString = '<div class="infowindow"><b>Carrefour Express</b><br>Via Vigilio Inama 5, Milano<br>' +
+		                     '<a href="http://www.carrefour.it">Website</a> | <a href="tel:+39 02 70005311">Call</a> | <a href="mailto:federico.perego@eptarefrigeration.com">Mail</a>' +
+							 '<hr><p><img src="images/carrefour1.jpg" onClick="streetview()" width="48%" height="44"/>&nbsp&nbsp<img src="images/carrefour2.jpg" onClick="streetview()" width="48%" height="44" onclick="streetview"/></p></div>';
+		var engString = ['<div class="techniciancontent"><b>Technician Name 1</b><br><font id="info1" color=blue>Click for Info</font>'+
+		                 '<hr><p><div class="technicianimg"><img src="images/tech.png" width="60" height="60" /></div>'+
+						 '<div class="techniciantext">Reliability: <b><font color=orange>MIDDLE</font></b><br>Position:&nbsp&nbsp&nbsp&nbspVia Rondoni 11<br>Ready in:&nbsp&nbsp&nbsp<b>10 min</b></div></p></div>',
+						 '<div class="techniciancontent"><b>Technician Name 2</b><br><font id="info2" color=blue>Click for Info</font>'+
+		                 '<hr><p><div class="technicianimg"><img src="images/tech.png" width="60" height="60" /></div>'+
+						 '<div class="techniciantext">Reliability: <b><font color=red>LOW</font></b><br>Position:&nbsp&nbsp&nbsp&nbspVia Mecenate 86<br>Ready in:&nbsp&nbsp&nbsp<b>25 min</b></div></p></div>',
+						 '<div class="techniciancontent"><b>Technician Name 3</b><br><font id="info3" color=blue>Click for Info</font>'+
+		                 '<hr><p><div class="technicianimg"><img src="images/tech.png" width="60" height="60" /></div>'+
+						 '<div class="techniciantext">Reliability: <b><font color=green>HIGH</font></b><br>Position:&nbsp&nbsp&nbsp&nbspCorso Buenos Aires 1<br>Ready in:&nbsp&nbsp&nbsp<b>5 min</b></div></p></div>',
+						 '<div class="techniciancontent"><b>Technician Name 4</b><br><font id="info4" color=blue>Click for Info</font>'+
+		                 '<hr><p><div class="technicianimg"><img src="images/tech.png" width="60" height="60" /></div>'+
+						 '<div class="techniciantext">Reliability: <b><font color=green>HIGH</font></b><br>Position:&nbsp&nbsp&nbsp&nbspVia Allori 16<br>Ready in:&nbsp&nbsp&nbsp<b>15 min</b></div></p></div>' ];
+		var engMove = ['Milano, Via Mecenate 20',
+			           'Milano, Via Marco Bruto 10',
+			           'Milano, Viale Corsica 96',
+			           'Milano, Viale Corsica 40',
+			           'Milano, Corso XXII Marzo 20',
+			           'Milano, Corso di Porta Vittoria 40',
+			           'Milano, Corso di Porta Vittoria 5',
+			           'Milano, Via Larga 5',
+			           'Milano, Via Albricci 10',
+			           'Milano, Via Mazzini 10',
+			           'Milano, Via Orefici 10',
+			           'Milano, Via Porrone Bassano 8',
+					   '<div class="techniciancontent"><b>Technician Name 2</b><br><a href="tel:+39 347 8901234">Call</a> | <a href="sms:+39 347 8901234">SMS</a> | <a href="mailto:federico.perego@eptarefrigeration.com">Mail</a>'+
+		               '<hr><p><div class="technicianimg2"><img src="images/tech.png" width="60" height="60" /></div>'+
+					   '<div class="techniciantext">Reliability: <b><font color=red>LOW</font></b><br>Position:&nbsp&nbsp&nbsp&nbspVia Mecenate 20<br>Ready in:&nbsp&nbsp&nbsp<b>23 min</b></div></p></div>',
+					   '<div class="techniciancontent"><b>Technician Name 2</b><br><a href="tel:+39 347 8901234">Call</a> | <a href="sms:+39 347 8901234">SMS</a> | <a href="mailto:federico.perego@eptarefrigeration.com">Mail</a>'+
+		               '<hr><p><div class="technicianimg2"><img src="images/tech.png" width="60" height="60" /></div>'+
+					   '<div class="techniciantext">Reliability: <b><font color=red>LOW</font></b><br>Position:&nbsp&nbsp&nbsp&nbspVia Marco Bruto 10<br>Ready in:&nbsp&nbsp&nbsp<b>21 min</b></div></p></div>',
+                       '<div class="techniciancontent"><b>Technician Name 2</b><br><a href="tel:+39 347 8901234">Call</a> | <a href="sms:+39 347 8901234">SMS</a> | <a href="mailto:federico.perego@eptarefrigeration.com">Mail</a>'+
+		               '<hr><p><div class="technicianimg2"><img src="images/tech.png" width="60" height="60" /></div>'+
+					   '<div class="techniciantext">Reliability: <b><font color=red>LOW</font></b><br>Position:&nbsp&nbsp&nbsp&nbspViale Corsica 96<br>Ready in:&nbsp&nbsp&nbsp<b>19 min</b></div></p></div>',
+                       '<div class="techniciancontent"><b>Technician Name 2</b><br><a href="tel:+39 347 8901234">Call</a> | <a href="sms:+39 347 8901234">SMS</a> | <a href="mailto:federico.perego@eptarefrigeration.com">Mail</a>'+
+		               '<hr><p><div class="technicianimg2"><img src="images/tech.png" width="60" height="60" /></div>'+
+					   '<div class="techniciantext">Reliability: <b><font color=red>LOW</font></b><br>Position:&nbsp&nbsp&nbsp&nbspViale Corsica 40<br>Ready in:&nbsp&nbsp&nbsp<b>17 min</b></div></p></div>',
+                       '<div class="techniciancontent"><b>Technician Name 2</b><br><a href="tel:+39 347 8901234">Call</a> | <a href="sms:+39 347 8901234">SMS</a> | <a href="mailto:federico.perego@eptarefrigeration.com">Mail</a>'+
+		               '<hr><p><div class="technicianimg2"><img src="images/tech.png" width="60" height="60" /></div>'+
+					   '<div class="techniciantext">Reliability: <b><font color=red>LOW</font></b><br>Position:&nbsp&nbsp&nbsp&nbspCorso XXII Marzo 20<br>Ready in:&nbsp&nbsp&nbsp<b>15 min</b></div></p></div>',
+                       '<div class="techniciancontent"><b>Technician Name 2</b><br><a href="tel:+39 347 8901234">Call</a> | <a href="sms:+39 347 8901234">SMS</a> | <a href="mailto:federico.perego@eptarefrigeration.com">Mail</a>'+
+		               '<hr><p><div class="technicianimg2"><img src="images/tech.png" width="60" height="60" /></div>'+
+					   '<div class="techniciantext">Reliability: <b><font color=red>LOW</font></b><br>Position:&nbsp&nbsp&nbsp&nbspCorso di Porta Vittoria 40<br>Ready in:&nbsp&nbsp&nbsp<b>13 min</b></div></p></div>',
+                       '<div class="techniciancontent"><b>Technician Name 2</b><br><a href="tel:+39 347 8901234">Call</a> | <a href="sms:+39 347 8901234">SMS</a> | <a href="mailto:federico.perego@eptarefrigeration.com">Mail</a>'+
+		               '<hr><p><div class="technicianimg2"><img src="images/tech.png" width="60" height="60" /></div>'+
+					   '<div class="techniciantext">Reliability: <b><font color=red>LOW</font></b><br>Position:&nbsp&nbsp&nbsp&nbspCorso di Porta Vittoria 5<br>Ready in:&nbsp&nbsp&nbsp<b>11 min</b></div></p></div>',
+                       '<div class="techniciancontent"><b>Technician Name 2</b><br><a href="tel:+39 347 8901234">Call</a> | <a href="sms:+39 347 8901234">SMS</a> | <a href="mailto:federico.perego@eptarefrigeration.com">Mail</a>'+
+		               '<hr><p><div class="technicianimg2"><img src="images/tech.png" width="60" height="60" /></div>'+
+					   '<div class="techniciantext">Reliability: <b><font color=red>LOW</font></b><br>Position:&nbsp&nbsp&nbsp&nbspVia Larga 5<br>Ready in:&nbsp&nbsp&nbsp<b>9 min</b></div></p></div>',
+                       '<div class="techniciancontent"><b>Technician Name 2</b><br><a href="tel:+39 347 8901234">Call</a> | <a href="sms:+39 347 8901234">SMS</a> | <a href="mailto:federico.perego@eptarefrigeration.com">Mail</a>'+
+		               '<hr><p><div class="technicianimg2"><img src="images/tech.png" width="60" height="60" /></div>'+
+					   '<div class="techniciantext">Reliability: <b><font color=red>LOW</font></b><br>Position:&nbsp&nbsp&nbsp&nbspVia Albricci 10<br>Ready in:&nbsp&nbsp&nbsp<b>7 min</b></div></p></div>',
+                       '<div class="techniciancontent"><b>Technician Name 2</b><br><a href="tel:+39 347 8901234">Call</a> | <a href="sms:+39 347 8901234">SMS</a> | <a href="mailto:federico.perego@eptarefrigeration.com">Mail</a>'+
+		               '<hr><p><div class="technicianimg2"><img src="images/tech.png" width="60" height="60" /></div>'+
+					   '<div class="techniciantext">Reliability: <b><font color=red>LOW</font></b><br>Position:&nbsp&nbsp&nbsp&nbspVia Mazzini 10<br>Ready in:&nbsp&nbsp&nbsp<b>5 min</b></div></p></div>',
+                       '<div class="techniciancontent"><b>Technician Name 2</b><br><a href="tel:+39 347 8901234">Call</a> | <a href="sms:+39 347 8901234">SMS</a> | <a href="mailto:federico.perego@eptarefrigeration.com">Mail</a>'+
+		               '<hr><p><div class="technicianimg2"><img src="images/tech.png" width="60" height="60" /></div>'+
+					   '<div class="techniciantext">Reliability: <b><font color=red>LOW</font></b><br>Position:&nbsp&nbsp&nbsp&nbspVia Orefici 10<br>Ready in:&nbsp&nbsp&nbsp<b>< 2 min</b></div></p></div>',
+                       '<div class="techniciancontent"><b>Technician Name 2</b><br><a href="tel:+39 347 8901234">Call</a> | <a href="sms:+39 347 8901234">SMS</a> | <a href="mailto:federico.perego@eptarefrigeration.com">Mail</a>'+
+		               '<hr><p><div class="technicianimg2"><img src="images/tech.png" width="60" height="60" /></div>'+
+					   '<div class="techniciantext">Reliability: <b><font color=red>LOW</font></b><br>Position:&nbsp&nbsp&nbsp&nbspVia Vigilio Inama 5<br>Ready in:&nbsp&nbsp&nbsp<b>NOW</b></div></p></div>'];
+				
+		function bounce() {
+		    if (iterator != 0) { 
+		      for (var i = 0; i <= iterator ; i++) {
+			    markers.pop();}
+			  iterator = 0; }
+			
+			for (var i = 0; i < engineers.length; i++) {
+			  setTimeout(function() { addMarker(); }, i*1000); } }
+		
+		function startTracking(i) {		
+			setTimeout(function() { 
+						 if(i < engMove.length - 12){
+						   geocoder.geocode( { 'address': engMove[i] }, function(results) {
+                             markers[1].setPosition(results[0].geometry.location);
+							 }); 
+						 infowindow[1].setContent(engMove[i + 12]); } 
+							 
+						   i++;
+						   startTracking(i); }, 3000); }
+		
+		function addMarker() {
+			geocoder.geocode( { 'address': engineers[iterator] }, function(results) {
+			  markers.push(new google.maps.Marker( {
+			    position : results[0].geometry.location,
+				map      : Map1,
+				draggable: false,
+				animation: google.maps.Animation.BOUNCE })); 
+			
+			  infowindow.push(new google.maps.InfoWindow( {
+				content : engString[iterator],
+				maxWidth: 320 }));
+			  
+			  google.maps.event.addListener(markers[iterator], 'click', function(iterator) {
+				return function() {					
+					infowindow[iterator].open(Map1, markers[iterator]); } }(iterator));
+				
+			  google.maps.event.addListener(infowindow[iterator], 'domready', function(iterator) { 
+				return function() {	
+					if(iterator == 0) { 
+						$("#info1").click(function() {
+						$("#info1").hide();
+						$("#info1").before("<a href='tel:+39 346 1234567'>Call</a> | <a href='sms:+39 346 1234567'>SMS</a> | <a href='mailto:federico.perego@eptarefrigeration.com'>Mail</a>"); }); }
+					else if(iterator == 1){ 
+						$("#info2").click(function() {
+						$("#info2").hide();
+						$("#info2").before("<a href='tel:+39 347 8901234'>Call</a> | <a href='sms:+39 347 8901234'>SMS</a> | <a href='mailto:federico.perego@eptarefrigeration.com'>Mail</a>"); }); }
+					else if(iterator == 2){ 
+						$("#info3").click(function() {
+						$("#info3").hide();
+						$("#info3").before("<a href='tel:+39 348 5678901'>Call</a> | <a href='sms:+39 348 5678901'>SMS</a> | <a href='mailto:federico.perego@eptarefrigeration.com'>Mail</a>"); }); }
+					else if(iterator == 3){ 
+						$("#info4").click(function() {
+						$("#info4").hide();
+						$("#info4").before("<a href='tel:+39 349 2345678'>Call</a> | <a href='sms:+39 349 2345678'>SMS</a> | <a href='mailto:federico.perego@eptarefrigeration.com'>Mail</a>"); }); } } }(iterator));
+							  
+			  iterator++; }); }
+			
+		function initialize(){
+			Map1 = null;
+		    geocoder = new google.maps.Geocoder();
+			google.maps.visualRefresh = true;
+			
+		    directionsDisplay = new google.maps.DirectionsRenderer();
+            var Options = {
+				zoom                 : 12,
+				zoomControl          : false,
+                center               : new google.maps.LatLng(45.46607, 9.18635),
+				mapTypeControlOptions: { style: google.maps.MapTypeControlStyle.DROPDOWN_MENU },
+                mapTypeId            : google.maps.MapTypeId.ROADMAP,
+				streetViewControl    : true };
+			
+            Map1 = new google.maps.Map($('#map_canvas').get(0), Options);
+					
+			var Marker = new google.maps.Marker({
+				position: new google.maps.LatLng(45.46607, 9.18635),
+				map     : Map1,
+				icon    : 'http://lh6.ggpht.com/_XJVjOtb_kV0/TP_LKg-QMFI/AAAAAAAAD1c/3ys2Ge6l1tg/Carrefour%2050b.png' });
+			var infowindow = new google.maps.InfoWindow({
+				content : customerString,
+				maxWidth: 190 });
+				
+			google.maps.event.addListener(Marker, 'click', function() {
+				infowindow.open(Map1, Marker); });
+												   
+			directionsDisplay.setMap(Map1); }
+		
+		function initialize2() {  
+			Map2 = null;
+		    google.maps.visualRefresh = true;
+			
+		    directionsDisplay = new google.maps.DirectionsRenderer();
+            var Options = {
+				zoom                 : 12,
+				zoomControl          : false,
+                center               : new google.maps.LatLng(45.46591, 9.18663),
+				mapTypeControlOptions: { style: google.maps.MapTypeControlStyle.DROPDOWN_MENU },
+                mapTypeId            : google.maps.MapTypeId.ROADMAP,
+				streetViewControl    : true };
+			
+            Map2 = new google.maps.Map($('#map_canvas2').get(0), Options);
+			directionsDisplay.setMap(Map2); }
+		
+		function initialize3(address, zoom) {  
+			Map3 = null;
+			geocoder = null;
+			geocoder = new google.maps.Geocoder();
+			
+			geocoder.geocode( { 'address': address }, function(results) {
+				var Options = { 
+					center     : results[0].geometry.location };
+				var POptions = {
+					addressControl       : true,
+					zoomControl          : false,
+					addressControlOptions: {
+						style: {backgroundColor: 'grey', color: 'yellow'} },
+					position             : results[0].geometry.location,
+					pov                  : {
+						heading: 215,
+						pitch  : 1,
+						zoom   : zoom } };
+			
+				Map3 = new google.maps.Map($('#map_canvas3').get(0), Options);
+				Panorama = new  google.maps.StreetViewPanorama($('#map_canvas3').get(0), POptions);
+				Map3.setStreetView(Panorama); } ); }
+		
+		function calcRoute(departureCity,destinationCity) {  
+			var request = {  
+				origin     : departureCity,  
+                destination: destinationCity,  
+                travelMode : google.maps.TravelMode.DRIVING };
+			
+            directionsService.route(request, function(result, status){  
+				if (status == google.maps.DirectionsStatus.OK) {  
+					directionsDisplay.setDirections(result); } }); }
+		
+		function getPieRevenueDataModel() {
+			var data = [ {
+				product: "M1",
+				revenue: 5 }, {
+				product: "M2",
+				revenue: 40 }, {
+				product: "M3",
+				revenue: 20 }, {
+				product: "M4",
+				revenue: 35 } ];
+
+			var model = new sap.ui.model.json.JSONModel();
+			model.setData(data);
+			return model; }
+		
+		function getSingleSeriesJSONDataModel() {
+			var testdata = [];
+			var date = new Date();
+			var currentYear = date.getFullYear();
+			var i;
+			for(i = currentYear - 6; i < currentYear; i++) {
+				var rev = (Math.random() * 20);
+				testdata.push( {
+					year   : i,
+					revenue: rev }); }
+	
+			SSTestData = {mydata : testdata};
+
+			var model = new sap.ui.model.json.JSONModel();
+			model.setData(SSTestData);
+			model.setSizeLimit(6);
+			return model; }
+		
+		function setChart_Button(chart, button) {
+			$("#Line_Chart").fadeOut(800);
+			setTimeout(function(){
+						$("#Line_Chart").fadeIn(800);
+						if     (chart.getType() == sap.makit.ChartType.Line) {
+							if     (button.getSrc() == 'images/bubble.png') {
+								chart.setType(sap.makit.ChartType.Bubble); }
+							else if(button.getSrc() == 'images/bar.png') {
+								chart.setType(sap.makit.ChartType.Bar); }
+							else if(button.getSrc() == 'images/pie.png') {
+								try {
+									chart.setType(sap.makit.ChartType.Donut); } 
+								catch(exception) { }
+								finally { 
+									button.setSrc('images/line.png'); } }
+							else if(button.getSrc() == 'images/line.png') {
+								chart.setType(sap.makit.ChartType.Line); }
+							button.setSrc('images/line.png'); }
+						else if(chart.getType() == sap.makit.ChartType.Bubble) {
+							if     (button.getSrc() == 'images/line.png') {
+								chart.setType(sap.makit.ChartType.Line); }
+							else if(button.getSrc() == 'images/bar.png') {
+								chart.setType(sap.makit.ChartType.Bar); }
+							else if(button.getSrc() == 'images/pie.png') {
+								try {
+									chart.setType(sap.makit.ChartType.Donut); }
+								catch(exception) { }	
+								finally {
+									button.setSrc('images/bubble.png'); } }
+							else if(button.getSrc() == 'images/bubble.png') {
+								chart.setType(sap.makit.ChartType.Bubble); }
+							button.setSrc('images/bubble.png'); }
+						else if(chart.getType() == sap.makit.ChartType.Bar) {
+							if     (button.getSrc() == 'images/bubble.png') {
+								chart.setType(sap.makit.ChartType.Bubble); }
+							else if(button.getSrc() == 'images/line.png') {
+								chart.setType(sap.makit.ChartType.Line); }
+							else if(button.getSrc() == 'images/pie.png') {
+								try {
+									chart.setType(sap.makit.ChartType.Donut); }
+								catch(exception) { }
+								finally { 
+									button.setSrc('images/bar.png'); } }
+							else if(button.getSrc() == 'images/bar.png') {
+								chart.setType(sap.makit.ChartType.Bar); }
+							button.setSrc('images/bar.png'); }
+						else if(chart.getType() == sap.makit.ChartType.Donut) {
+							if     (button.getSrc() == 'images/bubble.png') {
+								chart.setType(sap.makit.ChartType.Bubble); }
+							else if(button.getSrc() == 'images/bar.png') {
+								chart.setType(sap.makit.ChartType.Bar); }
+							else if(button.getSrc() == 'images/line.png') {
+								chart.setType(sap.makit.ChartType.Line); }
+							else if(button.getSrc() == 'images/pie.png') {
+								try {
+									chart.setType(sap.makit.ChartType.Donut); } 
+								catch(exception) { }
+								finally { 
+									button.setSrc('images/pie.png'); } }
+							button.setSrc('images/pie.png'); } },800) }
+		
+		function streetview() {
+			App.to("Maps3"); 
+				Maps3.setTitle("Carrefour Express");
+				initialize3("Carrefour Express, Via Vigilio Inama 5, Milano", 1); }
+	</script>
+
+	<script>
+		var dialog = new sap.m.BusyDialog({
+			title           : "Rendering Map...",
+			showCancelButton: false	});
+		var HistoryPage = "page";
+		var Ori_P = true;
+		var App = new sap.m.App( {
+			initialPage      : "Intro",
+			afterNavigate    : function(oEvent) {
+				/*switch(oEvent.getParameter("to").getId()) {
+					case "EyeFreight":
+					case "Maps1"     : 
+						dialog.close();
+					case "Maps2"     : 
+						dialog.close(); }*/ },
+			orientationChange: function(oControlEvent)	{
+				if   (oControlEvent.getParameter("landscape")) {
+					Ori_P = false;
+					if     (SegmentedButtonC.getSelectedButton() == "BC2" ) {
+						oCalendar.setMonthsToDisplay(3);
+						oCalendar.setWeeksPerRow(1);
+						oCalendar.setMonthsPerRow(2); }
+					else if(SegmentedButtonC.getSelectedButton() == "BC3" ) {
+						oCalendar.setMonthsToDisplay(12);
+						oCalendar.setWeeksPerRow(1);
+						oCalendar.setMonthsPerRow(2); } 
+						
+					List_LP.addColumn(new sap.m.Column( {
+											width : "90px",
+											header: new sap.m.Label( {
+												text  : "Log.Owner",
+												design: sap.m.LabelDesign.Bold }) }));
+					ColumnList_LP.addCell(new sap.m.Text( { 
+											text: "{logowner}" }));
+					List_LP.bindItems( {
+						path    : "/items",
+						template: ColumnList_LP }); }
+				else {
+					Ori_P = true;
+					if     (SegmentedButtonC.getSelectedButton() == "BC2" ) {
+						oCalendar.setMonthsToDisplay(3);
+						oCalendar.setWeeksPerRow(1);
+						oCalendar.setMonthsPerRow(1); }
+					else if(SegmentedButtonC.getSelectedButton() == "BC3" ) {
+						oCalendar.setMonthsToDisplay(12);
+						oCalendar.setWeeksPerRow(1);
+						oCalendar.setMonthsPerRow(1); } 
+						
+					List_LP.removeColumn(3);	
+					ColumnList_LP.removeCell(3); } } } );
+			
+		var Pull = new sap.m.PullToRefresh( {
+			description: "Last Updated: Never",
+			refresh    : function() {
+				setTimeout(function() {
+					List.addItem(ListItem6).addItem(ListItem1).addItem(ListItem2).addItem(ListItem4).addItem(ListItem5);
+					Home.addContent(List);
+					Pull.hide();
+					Pull.setDescription("Last Updated: Today");}, 2000); } });
+		
+		var Home = new sap.m.Page("Home", {
+			title           : "Home",
+			content         : Pull });
+					
+		var List = new sap.m.List("List", {
+			swipeContent: new sap.m.Button({
+				text: "Delete",
+				type: "Reject",
+				tap : function() {
+					    var swipedItem = List.getSwipedItem();
+					    List.removeItem(swipedItem);
+					    List.swipeOut(); } }) });
+		var ListItem1 = new sap.m.StandardListItem("AnalyticsListItem", {
+			title      : "Analytics",
+			description: "access the charts list",
+			icon       : sap.ui.core.IconPool.getIconURI('pie-chart'),
+			iconInset  : false,
+			type       : sap.m.ListType.Navigation, 
+			press      : function() {
+							App.to("Analytics"); } });
+		var ListItem2 = new sap.m.StandardListItem("mapsListItem", {
+			title      : "Geolocation",
+			description: "maps on your palm",
+			icon       : sap.ui.core.IconPool.getIconURI('map'),
+			iconInset  : false,
+			type       : sap.m.ListType.Navigation, 
+			press      : function() {
+							App.to("Maps"); } });
+		var ListItem4 = new sap.m.StandardListItem("YTListItem", {
+			title      : "Media", 
+			description: "enjoy the epta channel",
+			icon       : sap.ui.core.IconPool.getIconURI('sys-monitor'),
+			iconInset  : false,
+			type       : sap.m.ListType.Navigation, 
+			press      : function() {
+							App.to("YT"); } });
+		var ListItem5 = new sap.m.StandardListItem("SettingsListItem", {
+			title      : "Settings",
+			description: "how can i fit your needs?",
+			icon       : sap.ui.core.IconPool.getIconURI('settings'),
+			iconInset  : false,
+			type 	   : sap.m.ListType.Navigation, 
+			press      : function() {
+							App.to("Settings"); } });
+		var ListItem6 = new sap.m.StandardListItem("TilesListItem", {
+			title	   : "Dashboard", 
+			description: "your very starting point",
+			icon       : sap.ui.core.IconPool.getIconURI('ipad'),
+			iconInset  : false,
+			type       : sap.m.ListType.Navigation, 
+			press      : function() {
+							App.to("Tiles"); } });
+		
+		List.addItem(ListItem6).addItem(ListItem1).addItem(ListItem2).addItem(ListItem4).addItem(ListItem5);
+		Home.addContent(List);
+		
+		var stopTracking = false;
+		var Button1 = new sap.m.Button( {
+						type : sap.m.ButtonType.Accept,
+						text : "Show Positions",
+						press: function() { 
+							     bounce(); } });
+		var Button2 = new sap.m.Button( {
+						type : sap.m.ButtonType.Reject,
+						text : "Reset Positions",
+						press: function() {
+								 stopTracking = false; 
+								 customerCircle.setMap(null);
+								 customerCircle = null;
+							     for (var i = 0; i < markers.length; i++) {
+								   markers[i].setMap(null); }
+							     for (var i = 0; i <= iterator; i++) {
+								   markers.pop(); } } });
+		var Button3 = new sap.m.Button( {
+						type : sap.m.ButtonType.Accept,
+						text : "Start Tracking",
+						press: function() { 
+							     var i = 0; 	
+							     startTracking(i);
+								 stopTracking = true; } });
+		var Button4 = new sap.m.Button( {
+						text : "Stop Tracking",
+						press: function() { 
+							     stopTracking = false; } });
+		var Button5 = new sap.m.Button( {
+						type : sap.m.ButtonType.Accept,
+						text : "Add Perimeter",
+						press: function() { 
+							     var Circle = {
+							       strokeColor  : '#0194C9',
+								   strokeOpacity: 1,
+								   strokeWeight : 1,
+								   fillColor    : '#0194C9',
+								   fillOpacity  : 0.2,
+								   map          : Map1,
+								   draggable    : true,
+								   center       : new google.maps.LatLng(45.46607, 9.18635),
+								   radius       : 3500 };
+								 customerCircle = new google.maps.Circle(Circle); } });
+		var oActionSheet = new sap.m.ActionSheet({
+			showCancelButton: true,
+			buttons         : [ Button5, Button1, Button3, Button4, Button2 ],
+			cancelButtonText: "Cancel",
+			placement       : sap.m.PlacementType.Bottom });
+		
+		var ListA = new sap.m.List();
+		var ListItem1A = new sap.m.StandardListItem( {
+			title: "Pie Chart", 
+			icon : sap.ui.core.IconPool.getIconURI('pie-chart'), 
+			type : sap.m.ListType.Navigation, 
+			tap  : function() {
+				     App.to("Analytics2"); } });
+		var ListItem2A = new sap.m.StandardListItem( {
+			title: "Charts Carousel", 
+			icon : sap.ui.core.IconPool.getIconURI('business-objects-experience'), 
+			type : sap.m.ListType.Navigation, 
+			tap  : function() {
+				     App.to("Analytics4"); } });
+		ListA.addItem(ListItem1A).addItem(ListItem2A);				
+		var Analytics = new sap.m.Page("Analytics", {
+			title           : "Analytics", 
+			showNavButton   : true,
+			enableScrolling : true,
+			navButtonTap    : function() {
+							   App.back(); },
+			content         : ListA });
+					
+		var oChart = new sap.makit.Chart( {
+			width         : "100%",
+			height        : "92%",
+			type          : sap.makit.ChartType.Pie,
+			valueAxis     : new sap.makit.ValueAxis({}),
+			maxSliceCount : 4,
+			showTotalValue: true,
+			legendPosition: sap.makit.LegendPosition.Bottom,
+			categoryAxis  : new sap.makit.CategoryAxis({}),
+			category      : new sap.makit.Category( {
+				column       : "product" }),
+			values        : [new sap.makit.Value( {
+				expression : "revenue",
+				format     : "currency" })] });
+		oChart.addColumn(new sap.makit.Column( {
+			name : "product", 
+			value: "{product}" }));
+		oChart.addColumn(new sap.makit.Column( {
+			name : "revenue", 
+			value: "{revenue}", 
+			type : "number" }));
+			
+		var pieModel = getPieRevenueDataModel();	
+		oChart.setModel(pieModel);
+		oChart.bindRows("/");
+	
+		var Analytics2 = new sap.m.Page("Analytics2", {
+			title           : "Pie Chart", 
+			showNavButton   : true,
+			enableScrolling : true,
+			navButtonTap    : function() {
+							   App.back(); },
+			headerContent   : new sap.m.Button( { 
+							    icon : sap.ui.core.IconPool.getIconURI('synchronize'),
+							    press: function() {
+								         oChart.getType() == sap.makit.ChartType.Pie ? oChart.setType(sap.makit.ChartType.Donut) : oChart.setType(sap.makit.ChartType.Pie); } }),
+			content         : oChart });
+				
+		var row = new sap.makit.Row();
+		row.addCell(new sap.makit.Column( {
+			name : "yearCategory", 
+			value: "{year}" }));
+		row.addCell(new sap.makit.Column( {
+			name : "country", 
+			value: "{country}" }));
+		row.addCell(new sap.makit.Column( {
+			name : "revenueValue", 
+			value: "{revenue}", 
+			type : "number" }));
+		row.addCell(new sap.makit.Column( {
+			name : "costValue", 
+			value: "{cost}", 
+			type : "number" }));
+		
+		var ssModel = getSingleSeriesJSONDataModel();
+		var oChart2 = new sap.makit.Chart("Line_Chart", {
+			width            : "91%",
+			height           : "72%",
+			type             : sap.makit.ChartType.Line,
+			showRangeSelector: true,
+			showTableView    : false,
+			showTotalValue   : true,
+			lineThickness    : 2,
+			categoryAxis     : new sap.makit.CategoryAxis( {
+				showGrid        : true,
+				displayLastLabel: true,
+				color           : "#565656",
+                thickness       : 2	}),
+			valueAxis        : new sap.makit.ValueAxis( {
+				showGrid        : true,
+				showPrimaryLine : true,
+				color           : "#565656",
+                thickness       : 2	}),
+			valueBubble      : new sap.makit.ValueBubble( {
+				showCategoryText       : false,
+				showCategoryDisplayName: false,
+				showValueDisplayName   : false }),
+			category         : new sap.makit.Category( {
+				column     : "yearCategory"	}),
+			values           : [new sap.makit.Value( {
+				expression : "revenueValue",
+				format     : "currency",
+				displayName: "Revenue" })] });
+		
+		oChart2.addStyleClass("chart4");		
+		oChart2.addColumn(new sap.makit.Column( {
+			name : "yearCategory", 
+			value: "{year}" }));
+		oChart2.addColumn(new sap.makit.Column( {
+			name : "revenueValue", 
+			value: "{revenue}", 
+			type : "number" }));
+			oChart2.setModel(ssModel);
+		oChart2.bindRows("/mydata");
+				
+		var ImageC1 = new sap.m.Image("ImageC1", {
+			src   : 'images/bubble.png',
+			width : '60px',
+			height: '60px',
+			press : function() {
+				setChart_Button(oChart2, ImageC1); } });
+		ImageC1.addStyleClass("ichart"); 
+		var ImageC2 = new sap.m.Image("ImageC2", {
+			src   : 'images/bar.png',
+			width : '60px',
+			height: '60px',
+			press : function() {
+				setChart_Button(oChart2, ImageC2); } });
+		ImageC2.addStyleClass("ichart");
+		var ImageC3 = new sap.m.Image("ImageC3", {
+			src   : 'images/pie.png',
+			width : '60px',
+			height: '60px',
+			press : function() {
+				setChart_Button(oChart2, ImageC3); } });
+		ImageC3.addStyleClass("ichart");
+				
+		var Analytics4 = new sap.m.Page("Analytics4", {
+			title           : "Carousel", 
+			showNavButton   : true,
+			enableScrolling : true,
+			navButtonTap    : function() {
+							   App.back(); },
+			content         : [oChart2, ImageC1, ImageC2, ImageC3] });			
+		
+		var ListM = new sap.m.List();
+		var ListItem1M = new sap.m.StandardListItem( {
+			title: "Technician's Geolocation", 
+			icon : sap.ui.core.IconPool.getIconURI('map-2'), 
+			type : sap.m.ListType.Navigation, 
+			tap  : function() {
+				     dialog.open();
+					 setTimeout(function () {
+						dialog.close() }, 1500);
+				     App.to("Maps1"); 
+					 if(!Map1) {
+						initialize(); } } });
+		var ListItem2M = new sap.m.StandardListItem( {
+			title: "Trips Sight", 
+			icon : sap.ui.core.IconPool.getIconURI('map-3'), 
+			type : sap.m.ListType.Navigation, 
+			tap  : function() {
+				     dialog.open();
+					 setTimeout(function () {
+						dialog.close() }, 1500);
+				     App.to("Maps2");
+				     if(!Map2) {
+						initialize2(); } } });
+		ListM.addItem(ListItem1M).addItem(ListItem2M);				
+		var Maps = new sap.m.Page("Maps", {
+			title           : "Geolocation", 
+			showNavButton   : true,
+			enableScrolling : true,
+			navButtonTap    : function() {
+							   App.back(); },
+			content         : ListM });
+					
+	  	var Maps1 = new sap.m.Page("Maps1", {
+			title          : "Technicians", 
+			showNavButton  : true,
+			enableScrolling: false,
+			navButtonTap   : function() {
+							   for (var i = 0; i < markers.length; i++) {
+							     markers[i].setMap(null); }
+							   for (var i = 0; i <= iterator; i++) {
+								 markers.pop(); }
+							   initialize();
+							   App.back(); },
+			content        : new sap.ui.core.HTML( {
+							   content: "<div id='map_canvas' style='width: 100%; height: 520px;'></div>" }),
+			headerContent  : [new sap.m.Button( { 
+							    icon : sap.ui.core.IconPool.getIconURI('map'),
+							    press: function() {								  
+							      if(!markers[0]) {
+								    if(!customerCircle) {
+									  Button5.setVisible(true); }
+									else{
+									  Button5.setVisible(false); }
+									Button1.setVisible(true);
+								    Button2.setVisible(false);
+								    Button3.setVisible(false);
+								    Button4.setVisible(false);}
+								  else{
+								    if(!customerCircle) {
+									  Button5.setVisible(true); }
+									else{
+									  Button5.setVisible(false); }
+								    Button1.setVisible(false);
+								    Button2.setVisible(true);
+								    if(stopTracking) {
+								      Button3.setVisible(false); 
+									  Button4.setVisible(true); }
+								    else{
+								      Button3.setVisible(true); 
+									  Button4.setVisible(false); } }
+					
+								  oActionSheet.openBy(this); } })] });
+		
+		var Popover = new sap.m.Popover( {
+			placement      : sap.m.PlacementType.Bottom,
+			showHeader     : true,
+			title          : "List",
+			enableScrolling: true,
+			content        : new sap.m.List( {
+							   items: [
+							     new sap.m.StandardListItem( {
+								   title      : "Trip 1",
+								   description: "Belluno - Limana",
+								   type       : sap.m.ListType.Navigation,
+								   icon       : sap.ui.core.IconPool.getIconURI('car-rental'),
+								   press      : function() {
+												  calcRoute("Belluno", "Limana, Via Salvo D'Acquisto");
+												  Popover.close(); } }),
+								 new sap.m.StandardListItem( {
+								   title      : "Trip 2",
+								   description: "Roma - Pomezia",
+								   type       : sap.m.ListType.Navigation,
+								   icon       : sap.ui.core.IconPool.getIconURI('car-rental'),
+								   press      : function() {
+												  calcRoute("Roma", "Pomezia");
+												  Popover.close(); } }) ] }) });
+		var Maps2 = new sap.m.Page("Maps2", {
+			title          : "Trips", 
+			showNavButton  : true,
+			enableScrolling: false,
+			navButtonTap   : function() {
+							   initialize2();
+							   App.back(); },
+			content        : new sap.ui.core.HTML( {
+							   content: "<div id='map_canvas2' style='width: 100%; height: 520px;'></div>" }),
+			headerContent  : new sap.m.Button( { 
+							   icon : sap.ui.core.IconPool.getIconURI('map-3'),
+							   press: function() { 
+							     Popover.openBy(this); } }) });
+					
+		var Carousel = new sap.m.Carousel({
+			pages      : [
+			    new sap.m.Image("Image2", {
+					src  : "images/shirt.jpg",
+					width: "100%" }),
+				new sap.m.Image("Image3", {
+					src  : "images/cloud.jpg",
+					width: "100%" }) ],
+			pageChanged: function() { 
+				if(Carousel.getActivePage() === "Image3"){
+					Button.setText("Start!"); }
+				else{ Button.setText("Skip"); }	} });
+		
+		var Button = new sap.m.Button( { 
+			text : "Skip",
+			type : sap.m.ButtonType.Reject,
+			press: function() {			
+				App.to("Home"); } });
+		var Intro = new sap.m.Page("Intro", {
+			title          : "Welcome",
+			content        : Carousel,
+			enableScrolling: false,
+			headerContent  : [ Button ] });
+		
+		var Maps3 = new sap.m.Page("Maps3", {
+			title          : "Office", 
+			showNavButton  : true,
+			enableScrolling: false,
+			navButtonTap   : function() {
+							   Maps3.setTitle("Office");
+							   initialize3(person.office, 2);
+							   App.back(); },
+			content        : new sap.ui.core.HTML( {
+							   content: "<div id='map_canvas3' style='width: 100%; height: 520px;'></div>" }) });
+		
+		var person = {
+			name   : "Perego Federico - Epta",
+			office : "Via Mecenate, 86 - 20138 Milano - Italy",
+			tel    : "+39 02 55403278",
+			cell   : "+39 338 7302555",
+			sms    : "+39 338 7302555",
+			email  : "federico.perego@eptarefrigeration.com",
+			website: "http://www.eptarefrigeration.com" };
+		
+		var MeList = new sap.m.List({
+			inset     : true,
+			headerText: person.name,
+			items     : [
+				new sap.m.DisplayListItem({
+					label: "Office",
+					value: person.office,
+					type : sap.m.ListType.Active,
+					tap  : function() {
+						App.to("Maps3"); 
+						if(!Map3) {
+							initialize3(person.office, 2); } } }),
+				new sap.m.DisplayListItem({
+					label: "Telephone",
+					value: person.tel,
+					type : sap.m.ListType.Active,
+					tap  : function() {
+						sap.m.URLHelper.triggerTel(person.tel); } }),
+				new sap.m.DisplayListItem({
+					label: "Mobile",
+					value: person.cell,
+					type : sap.m.ListType.Active,
+					tap  : function() {
+						sap.m.URLHelper.triggerTel(person.cell); } }),
+				new sap.m.DisplayListItem({
+					label: "SMS",
+					value: person.sms,
+					type : sap.m.ListType.Active,
+					tap  : function() {
+						sap.m.URLHelper.triggerSms(person.sms); } }),
+				new sap.m.DisplayListItem({
+					label: "Email",
+					value: person.email,
+					type : sap.m.ListType.Active,
+					tap  : function() {
+						sap.m.URLHelper.triggerEmail(person.email, "Info", "Dear " + person.name + ","); } }),
+				new sap.m.DisplayListItem({
+					label: "Website",
+					value: person.website,
+					type : sap.m.ListType.Active,
+					tap  : function() {
+						sap.m.URLHelper.redirect(person.website, true); } }) ] });
+		var Me = new sap.m.Page("Me", {
+			title           : "Business Card",
+			showNavButton   : true,
+			enableScrolling : true,
+			content         : MeList, 
+			navButtonTap    : function() {
+				App.back(); } });
+		
+		var SettingList1 = new sap.m.List( {
+			headerText: "List Set 1",
+			footerText: "a boolean set of options",
+			inset     : true,
+			items     : [
+				new sap.m.InputListItem( {
+					label  : "Option A1",
+					content: new sap.m.Switch( {
+						state: true }) }),
+				new sap.m.InputListItem( {
+					label  : "Option A2",
+					content: new sap.m.Switch( {
+						state        : true,
+						customTextOn : "I",
+						customTextOff: "O" }) }),
+				new sap.m.InputListItem( {
+					label  : "Option A3",
+					content: new sap.m.Switch( {
+						state: false,
+                        type : sap.m.SwitchType.AcceptReject }) }),
+				new sap.m.InputListItem( {
+					label  : "Option B",
+					content: new sap.m.CheckBox( {
+						selected: true }) }) ] });
+		var SettingList2 = new sap.m.List( {
+			headerText: "List Set 2",
+			footerText: "a radiobutton set of options",
+			inset     : true,
+			items     : [
+				new sap.m.InputListItem( {
+					label  : "Option C1",
+					content: new sap.m.RadioButton( {
+						groupName:"GroupInputListItem",
+						selected : true }) }),
+				new sap.m.InputListItem( {
+					label  : "Option C2",
+					content: new sap.m.RadioButton( {
+						groupName:"GroupInputListItem" }) }) ] });
+		var SettingList3 = new sap.m.List( {
+			headerText: "List Set 3",
+			footerText: "other set of options",
+			inset     : true,
+			items     : [
+				new sap.m.InputListItem( {
+					label  : "Option D",
+					content: new sap.m.Input( {
+						placeholder: "Example",
+						type       : sap.m.InputType.Text }) }),
+				new sap.m.InputListItem( {
+					label  : "Option E",
+					content: new sap.m.Select( {
+						items: [
+							new sap.ui.core.Item({text: "Value 1"}),
+							new sap.ui.core.Item({text: "Value 2"}),
+							new sap.ui.core.Item({text: "Value 3"})] }) }),
+				new sap.m.InputListItem( {
+					label: "Option F",
+					content: new sap.m.Slider( {
+						min  : 0,
+						max  : 10,
+						value: 3,
+						width: "120px" }) }) ] });
+		var Settings = new sap.m.Page("Settings", {
+			title           : "Settings",
+			showNavButton   : true,
+			enableScrolling : true,
+			content         : [ SettingList1, SettingList2, SettingList3 ],
+			navButtonTap    : function() {
+				App.back(); } });
+		
+		var YT = new sap.m.Page("YT", {
+			title          : "Media", 
+			showNavButton  : true,
+			enableScrolling: true,
+			navButtonTap   : function() {
+				YT.destroyContent();
+				YT.addContent(new sap.ui.core.HTML({content: "<div class='left'><iframe width='100%' height='165' src='http://www.youtube.com/embed/tCkwIIwZKNM' frameborder='0' allowfullscreen></iframe><div class='backg'><div class='thumb'><img id='epta' src='images/epta.png' width='44' height='44' /></div><div class='text'>Thou Shall Honour Environment</div><div class='text2'>di EPTASpa | 0:53</div></div></div>" }))
+				  .addContent(new sap.ui.core.HTML({content: "<div class='left'><iframe width='100%' height='165' src='http://www.youtube.com/embed/q6I6fkxN3aI' frameborder='0' allowfullscreen></iframe><div class='thumb'><img id='epta' src='images/epta.png' width='44' height='44' /></div><div class='text'>Thou Shall Be Revolutionary</div><div class='text2'>di EPTASpa | 1:11</div></div>" }))
+				  .addContent(new sap.ui.core.HTML({content: "<div class='left'><iframe width='100%' height='165' src='http://www.youtube.com/embed/WdXgUqImArQ' frameborder='0' allowfullscreen></iframe><div class='thumb'><img id='epta' src='images/epta.png' width='44' height='44' /></div><div class='text'>Thou Shall Be Clean</div><div class='text2'>di EPTASpa | 1:04</div></div>" }));
+				App.back(); },
+			content        : [ 
+				new sap.ui.core.HTML({content: "<div class='left'><iframe width='100%' height='165' src='http://www.youtube.com/embed/tCkwIIwZKNM' frameborder='0' allowfullscreen></iframe><div class='backg'><div class='thumb'><img id='epta' src='images/epta.png' width='44' height='44' /></div><div class='text'>Thou Shall Honour Environment</div><div class='text2'>di EPTASpa | 0:53</div></div></div>" }),
+				new sap.ui.core.HTML({content: "<div class='left'><iframe width='100%' height='165' src='http://www.youtube.com/embed/q6I6fkxN3aI' frameborder='0' allowfullscreen></iframe><div class='thumb'><img id='epta' src='images/epta.png' width='44' height='44' /></div><div class='text'>Thou Shall Be Revolutionary</div><div class='text2'>di EPTASpa | 1:11</div></div>" }),
+				new sap.ui.core.HTML({content: "<div class='left'><iframe width='100%' height='165' src='http://www.youtube.com/embed/WdXgUqImArQ' frameborder='0' allowfullscreen></iframe><div class='thumb'><img id='epta' src='images/epta.png' width='44' height='44' /></div><div class='text'>Thou Shall Be Clean</div><div class='text2'>di EPTASpa | 1:04</div></div>" }) ] });
+		
+		var Tile1 = new sap.m.StandardTile( {
+								removable: true,
+								title    : "Examples",
+								info     : "to be deleted",
+								type     : sap.m.StandardTileType.Create,
+								infoState: sap.ui.core.ValueState.Error,
+								number   : 1,
+								icon     : sap.ui.core.IconPool.getIconURI('example') });
+		Tile1.addStyleClass("Tile");
+		var Tile2 = new sap.m.StandardTile( { 
+								removable: false,
+								title    : "Business Card",
+								info     : "click to show",
+								infoState: sap.ui.core.ValueState.Success,
+								type     : sap.m.StandardTileType.Monitor,
+								icon     : sap.ui.core.IconPool.getIconURI('employee-lookup'),
+								number   : 2,
+								press    : function() {
+									App.to("Me"); } });
+		Tile2.addStyleClass("Tile");
+		var Tile3 = new sap.m.StandardTile( {
+								removable: false,
+								title    : "Loading Plan",
+								type     : sap.m.StandardTileType.Monitor,
+								infoState: sap.ui.core.ValueState.Success,
+								info     : "click to show",
+								number   : 3,
+								icon     : sap.ui.core.IconPool.getIconURI('shipping-status'),
+								press    : function() { 
+									App.to("Sales"); } });
+		Tile3.addStyleClass("Tile");
+		var Tile4 = new sap.m.StandardTile( {
+								removable: false,
+								title    : "Calendar",
+								type     : sap.m.StandardTileType.Monitor,
+								infoState: sap.ui.core.ValueState.Success,
+								info     : "click to show",
+								number   : 4,
+								icon     : sap.ui.core.IconPool.getIconURI('calendar'),
+								press    : function() {						
+									App.to("Calendar"); } });
+		Tile4.addStyleClass("Tile");
+		var Tile5 = new sap.m.StandardTile( {
+								removable: false,
+								title    : "My Tasks",
+								info     : "to be defined",
+								number   : 5,
+								icon     : sap.ui.core.IconPool.getIconURI('task') });
+		Tile5.addStyleClass("Tile");
+		var Tile6 = new sap.m.StandardTile( {
+								removable: false,
+								title    : "Form",
+								type     : sap.m.StandardTileType.Monitor,
+								infoState: sap.ui.core.ValueState.Success,
+								info     : "click to show",
+								number   : 6,
+								icon     : sap.ui.core.IconPool.getIconURI('list'),
+								press    : function() {						
+									App.to("Form1"); } });
+		Tile6.addStyleClass("Tile");
+		var TileContainer = new sap.m.TileContainer( {
+				tiles     : [Tile1, Tile2, Tile3, Tile4, Tile5, Tile6 ],
+				tileDelete: function(oControlEvent) {
+					TileContainer.deleteTile(oControlEvent.getParameter("tile")); },
+				editable  : false,
+				allowAdd  : true });
+		TileContainer.attachTileMove(function (oEvent) {
+									    var busyDialog = new sap.m.BusyDialog( {
+											showCancelButton : false } );
+										busyDialog.setTitle("Moving Tiles..."),
+										busyDialog.open();
+										setTimeout(function () {busyDialog.close()}, 1500); });
+		var Tiles = new sap.m.Page("Tiles", {
+			title           : "Dashboard", 
+			showNavButton   : true,
+			enableScrolling : false,
+			navButtonTap    : function() {
+				App.back(); },
+			content         : TileContainer,
+			headerContent   : [ new sap.m.Button({ 
+				icon : sap.ui.core.IconPool.getIconURI('edit'),
+				press: function() {
+					if (!TileContainer.getEditable()) { 
+						TileContainer.setEditable(true); }
+					else{ 
+						TileContainer.setEditable(false); } } }) ] });
+		
+		var L1 = new sap.m.Label( {
+					design: sap.m.LabelDesign.Bold,
+					text  : 'name' });
+		var I1 = new sap.m.Input('input1', {
+					type       : sap.m.InputType.Text,
+					width      : "270px",
+					placeholder: 'john green' });
+		var L2 = new sap.m.Label( {
+					design: sap.m.LabelDesign.Bold,
+					text  : 'email' });
+		var I2 = new sap.m.Input('input2', {
+					type       : sap.m.InputType.Email, 
+					width      : "270px",
+					placeholder: 'example@example.com',
+					liveChange : function(oControlEvent) {
+						var i = oControlEvent.getParameter("newValue").search("@");
+						if(i > 0) { 
+							I2.setValueState(sap.ui.core.ValueState.Success); }
+						else {
+							I2.setValueStateText("a valid email address must contain '@'")
+							I2.setValueState(sap.ui.core.ValueState.Error); } } });
+		var L3 = new sap.m.Label( {
+					design: sap.m.LabelDesign.Bold,
+					text  : 'password' });
+		var I3 = new sap.m.Input('input3', {
+					type       : sap.m.InputType.Password, 
+					width      : "270px",
+					placeholder: 'abc123' });
+		var L4 = new sap.m.Label( {
+					design: sap.m.LabelDesign.Bold,
+					text  : 'phone' });
+		var I4 = new sap.m.Input('input4', {
+					type       : sap.m.InputType.Tel, 
+					width      : "270px",
+					placeholder: '+39 123 4567890' });
+		var L5 = new sap.m.Label( {
+					design: sap.m.LabelDesign.Bold,
+					text  : 'age' });
+		var I5 = new sap.m.Input('input5', {
+					type       : sap.m.InputType.Number,
+					width      : "270px",					
+					placeholder: '30' });
+		var L6 = new sap.m.Label( {
+				    design: sap.m.LabelDesign.Bold,
+					text  : 'website' });
+		var I6 = new sap.m.Input('input6', {
+					type       : sap.m.InputType.Url, 
+					width      : "270px",
+					placeholder: 'http://www.google.com' });
+		var L7 = new sap.m.Label( {
+					design: sap.m.LabelDesign.Bold,
+					text  : 'date' });
+		var I7 = new sap.m.DateTimeInput('dtInput1', {
+					type       : sap.m.DateTimeInputType.Date,
+					width      : "270px",
+					placeholder: '01/01/1980' });
+		var L8 = new sap.m.Label( {
+					design: sap.m.LabelDesign.Bold,
+					text  : 'time' });
+		var I8 = new sap.m.DateTimeInput('dtInput2', {
+					type       : sap.m.DateTimeInputType.Time,
+					width      : "270px",
+					placeholder: '12:10:00' });
+		var L9 = new sap.m.Label( {
+					design: sap.m.LabelDesign.Bold,
+					text  : 'date & time' });
+		var I9 = new sap.m.DateTimeInput('dtInput3', {
+					type       : sap.m.DateTimeInputType.DateTime, 
+					width      : "270px",
+					placeholder: '01/01/1980 12:10:00' });
+		var L10 = new sap.m.Label( {
+					design: sap.m.LabelDesign.Bold,
+					text  : 'comments' });
+		var I10 = new sap.m.TextArea( {
+					placeholder : "your comments here (max 500 char)",
+					rows        : 10,
+					maxLength   : 500,
+					width		: "270px" });
+		
+		var VBox1 = new sap.m.VBox("VBox1", {
+			alignItems: sap.m.FlexAlignItems.Center,
+			items     : [ L1, I1,
+					      L2, I2,
+				          L3, I3,
+				          L4, I4,
+					      L5, I5,
+					      L6, I6 ] });
+		var VBox2 = new sap.m.VBox("VBox2", {
+		    visible   : false,
+			alignItems: sap.m.FlexAlignItems.Center,
+			items     : [ L7, I7,
+						  L8, I8,
+				          L9, I9 ] });
+		var VBox3 = new sap.m.VBox("VBox3", {
+		    visible   : false,
+			alignItems: sap.m.FlexAlignItems.Center,
+			items     : [ L10, I10 ] });
+		VBox1.addStyleClass("form");
+		VBox2.addStyleClass("form");
+		VBox3.addStyleClass("form");
+						  
+		var B1 = new sap.m.Button( {
+			text : "input 1",
+			press: function() {
+				VBox2.setVisible(false);
+				VBox3.setVisible(false);
+				VBox1.setVisible(true); } });
+		var B2 = new sap.m.Button({
+			text : "input 2",
+			press: function() {
+				VBox2.setVisible(true);
+				VBox1.setVisible(false);
+				VBox3.setVisible(false); } });
+		var B3 = new sap.m.Button({
+			text : "input 3",
+			press: function() {
+			    VBox2.setVisible(false);
+				VBox1.setVisible(false);
+				VBox3.setVisible(true); } });
+		var SegmentedButton = new sap.m.SegmentedButton({
+			width         : '322px',
+			buttons       : [ B1, B2, B3 ],
+			selectedButton: B1 });
+		var Bar = new sap.m.Bar({
+		    translucent  : true,
+			contentMiddle: SegmentedButton });
+		
+		var Form1 = new sap.m.Page("Form1", {
+			title           : "Form", 
+			showNavButton   : true,
+			enableScrolling : true,
+			navButtonTap    : function() {
+				App.back(); },
+			content         : [Bar, VBox1, VBox2, VBox3] });
+			
+		var BC1 = new sap.m.Button("BC1", {
+			text : "1-month",
+			press: function() {
+				oCalendar.setMonthsToDisplay(1);
+	            oCalendar.setWeeksPerRow(1);
+	  	        oCalendar.setMonthsPerRow(1); } });
+		var BC2 = new sap.m.Button("BC2", {
+			text : "3-months",
+			press: function() {
+				if(Ori_P){
+					oCalendar.setMonthsToDisplay(3);
+					oCalendar.setWeeksPerRow(1);
+					oCalendar.setMonthsPerRow(1); }
+				else { 
+					oCalendar.setMonthsToDisplay(3);
+					oCalendar.setWeeksPerRow(1);
+					oCalendar.setMonthsPerRow(2); } } });
+		var BC3 = new sap.m.Button("BC3", {
+			text : "1-year",
+			press: function() {
+				if(Ori_P){
+					oCalendar.setMonthsToDisplay(12);
+					oCalendar.setWeeksPerRow(1);
+					oCalendar.setMonthsPerRow(1); }
+				else { 
+					oCalendar.setMonthsToDisplay(12);
+					oCalendar.setWeeksPerRow(1);
+					oCalendar.setMonthsPerRow(2); } } });
+		var SegmentedButtonC = new sap.m.SegmentedButton({
+			buttons       : [ BC1, BC2, BC3 ],
+			selectedButton: BC1,
+			width         : '322px' });
+		var BarC = new sap.m.Bar({
+		    translucent  : true,
+			contentMiddle: SegmentedButtonC });	
+		var oCalendar = new sap.me.Calendar("oCalendar", {
+			swipeToNavigate     : true,
+			hideNavControls     : true,
+			dayHeight           : 55,
+			dayWidth            : 10,
+			enableMultiselection: false,
+			design              : sap.me.CalendarDesign.Approval,
+			tapOnDate           : function() { 
+				var ButtonC = new sap.m.Button( {
+						type : sap.m.ButtonType.Accept,
+						text : "Add Event",
+						press: function() { } });
+				var oActionSheetC = new sap.m.ActionSheet({
+						showCancelButton: true,
+						buttons         : [ ButtonC ],
+						cancelButtonText: "Cancel",
+						placement       : sap.m.PlacementType.Bottom });
+				oActionSheetC.openBy(this); } });
+		oCalendar.toggleDatesType( ["2013/08/12"], sap.me.CalendarEventType.Type06, true);
+		oCalendar.toggleDatesType( ["2013/08/13"], sap.me.CalendarEventType.Type06, true);
+		oCalendar.toggleDatesType( ["2013/08/14"], sap.me.CalendarEventType.Type06, true);
+		oCalendar.toggleDatesType( ["2013/08/15"], sap.me.CalendarEventType.Type06, true);
+		oCalendar.toggleDatesType( ["2013/08/16"], sap.me.CalendarEventType.Type06, true);
+		oCalendar.toggleDatesType( ["2013/08/01"], sap.me.CalendarEventType.Type07, true);
+		oCalendar.toggleDatesType( ["2013/08/02"], sap.me.CalendarEventType.Type07, true);
+		oCalendar.toggleDatesType( ["2013/08/05"], sap.me.CalendarEventType.Type07, true);
+		oCalendar.toggleDatesType( ["2013/08/06"], sap.me.CalendarEventType.Type07, true);
+		oCalendar.toggleDatesType( ["2013/08/07"], sap.me.CalendarEventType.Type07, true);
+		oCalendar.toggleDatesType( ["2013/08/08"], sap.me.CalendarEventType.Type07, true);
+		oCalendar.toggleDatesType( ["2013/08/09"], sap.me.CalendarEventType.Type07, true);
+		oCalendar.addStyleClass("calendar");
+		var Cl = new sap.me.CalendarLegend("cl", {
+		    legendForType00  : "non-working day",
+			legendForType06  : "public holiday",
+			legendForType07  : "leave",
+			legendForToday   : "today",
+			legendForSelected: "selected",
+			legendForNormal  : "normal",
+			design           : "Approval",
+			expanded         : false,
+			expandable       : true });
+		
+		var Calendar = new sap.m.Page("Calendar", {
+			title           : "Calendar",
+			showNavButton   : true,
+			enableScrolling : true,
+			content         : [BarC, Cl, oCalendar],
+			navButtonTap    : function() {
+				App.back(); } });
+		
+		jQuery.sap.require("sap.ui.core.format.NumberFormat");
+		var oFloat = sap.ui.core.format.NumberFormat.getFloatInstance( {
+			minFractionDigits: 2, 
+			maxFractionDigits: 2 });
+
+		var model = new sap.ui.model.json.JSONModel( {
+			items: [
+				{id: "LL00000001", name:"Cust_01", status: "Created",       sorg: "CS10", logowner: "USER1"},
+				{id: "LL00000002", name:"Cust_02", status: "Released",      sorg: "CS20", logowner: "USER1"},
+				{id: "LL00000003", name:"Cust_03", status: "To Eyefreight", sorg: "CS20", logowner: "USER1"},
+				{id: "LL00000004", name:"Cust_04", status: "To Eyefreight", sorg: "BN10", logowner: "USER1"},
+				{id: "LL00000005", name:"Cust_05", status: "To Eyefreight", sorg: "BN10", logowner: "USER1"},
+				{id: "LL00000006", name:"Cust_06", status: "Created",       sorg: "CS10", logowner: "USER1"},
+				{id: "LL00000007", name:"Cust_07", status: "Released",      sorg: "CS10", logowner: "USER1"},
+				{id: "LL00000008", name:"Cust_08", status: "Created",       sorg: "CS20", logowner: "USER1"},
+				{id: "LL00000009", name:"Cust_09", status: "Released",      sorg: "BN20", logowner: "USER1"},
+				{id: "LL00000010", name:"Cust_10", status: "Created",       sorg: "BN20", logowner: "USER1"},
+				{id: "LL00000011", name:"Cust_11", status: "Released",      sorg: "BN10", logowner: "USER1"},
+				{id: "LL00000012", name:"Cust_12", status: "To Eyefreight", sorg: "CS10", logowner: "USER1"},
+				{id: "LL00000013", name:"Cust_13", status: "To Eyefreight", sorg: "CS10", logowner: "USER1"},
+				{id: "LL00000014", name:"Cust_14", status: "Released",      sorg: "CS10", logowner: "USER1"},
+				{id: "LL00000015", name:"Cust_15", status: "Released",      sorg: "CS10", logowner: "USER1"},
+				{id: "LL00000016", name:"Cust_16", status: "Created",       sorg: "CS10", logowner: "USER1"},
+				{id: "LL00000017", name:"Cust_17", status: "Created",       sorg: "CS20", logowner: "USER1"},
+				{id: "LL00000018", name:"Cust_18", status: "Released",      sorg: "BN10", logowner: "USER1"},
+				{id: "LL00000019", name:"Cust_19", status: "Created",       sorg: "BN20", logowner: "USER1"},
+				{id: "LL00000020", name:"Cust_20", status: "Created",       sorg: "CS30", logowner: "USER1"},
+				{id: "LL00000021", name:"Cust_21", status: "Created",       sorg: "CS20", logowner: "USER1"},
+				{id: "LL00000022", name:"Cust_22", status: "Created",       sorg: "CS10", logowner: "USER1"}] });
+		sap.ui.getCore().setModel(model);
+		
+		var ColumnList_LP = new sap.m.ColumnListItem( {
+											type : sap.m.ListType.Inactive,
+											cells: [
+												new sap.m.ObjectStatus( {
+													text : "{id}",
+													state: {
+														path     : "status",
+														formatter: function(value) {
+															switch(value) {
+																case "Created"      : return "Warning";
+																case "Released"     : return "Error";
+																case "To Eyefreight": return "Success"; } } } }),
+												new sap.m.Text( {
+													text: "{name}" }),
+												new sap.m.Text( {
+													text: "{sorg}" }) ] });
+		var List_LP = new sap.m.List("List_LP", {
+									columns     : [
+										new sap.m.Column( {
+											width : "90px",
+											header: new sap.m.Label( {
+												text  : "Number",
+												design: sap.m.LabelDesign.Bold }) }),
+										new sap.m.Column( {
+											width : "83px",
+											header: new sap.m.Label( {
+												text  : "Customer",
+												design: sap.m.LabelDesign.Bold }) }),
+										new sap.m.Column( {
+											width : "60px",
+											header: new sap.m.Label( {
+												text  : "Sal.Org",
+												design: sap.m.LabelDesign.Bold }) }) ],
+									items       : {
+										path    : "/items",
+										template: ColumnList_LP },
+									swipeContent: new sap.m.Button( {
+										text: "Eyefreight",
+										type: sap.m.ButtonType.Accept,
+										tap : function() {
+											sap.m.URLHelper.redirect("https://eta1.eyefreight.com/", true);
+											List.swipeOut(); } }) });
+	
+		var Sales = new sap.m.Page("Sales", {
+			enableScrolling: true,
+			showNavButton  : true,
+			title          : "Loading Plan",
+			content        : [new sap.m.IconTabBar( {
+						items  : [ new sap.m.IconTabFilter( {
+									showAll  : true,
+									count    : "22",
+									key      : "All" }),
+								   new sap.m.IconTabSeparator(),
+								   new sap.m.IconTabFilter( {
+									icon     : sap.ui.core.IconPool.getIconURI('task'),
+									iconColor: sap.ui.core.IconColor.Critical,
+									count    : "10",
+									text     : "Created",
+									key      : "Created" }),
+								   new sap.m.IconTabFilter( {
+									icon     : sap.ui.core.IconPool.getIconURI('instance'),
+									iconColor: sap.ui.core.IconColor.Negative,
+									count    : "7",
+									text     : "Released",
+									key      : "Released" }),
+								   new sap.m.IconTabFilter( {
+									icon     : sap.ui.core.IconPool.getIconURI('shipping-status'),
+									iconColor: sap.ui.core.IconColor.Positive,
+									count    : "5",
+									text     : "To Eyefreight",
+									key      : "To Eyefreight" }) ],
+						select : function(oEvent) {
+									var oBinding = this.getContent().getBinding("items");
+									var sKey = oEvent.getParameter("selectedKey");
+									var oFilter;
+									if (sKey == "All") {
+										oBinding.filter([]); } 
+									else {
+										oFilter = new sap.ui.model.Filter("status", "EQ", sKey);
+										oBinding.filter([oFilter]); } },
+						content: List_LP }) ],
+			navButtonTap: function() {
+				App.back(); } });
+		
+		App.addPage(Intro).addPage(Home).addPage(Analytics).addPage(Maps).addPage(Maps1).addPage(Maps2).addPage(Maps3).addPage(Analytics2)
+		   .addPage(Me).addPage(YT).addPage(Settings).addPage(Tiles).addPage(Form1).addPage(Calendar).addPage(Sales).addPage(Analytics4);
+		App.placeAt("content");
+    </script>
+
+  </head>
+  
+  <body class="sapUiBody">
+    <div id="content" style="width:100%">
+	</div>
+  </body>
+  
+</html>
